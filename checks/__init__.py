@@ -584,6 +584,9 @@ class AgentCheck(object):
                 "tags": (optional) list, a list of tags to associate with this event
             }
         """
+        tags = event.get("tags")
+        if tags:
+            event["tags"] = sorted(set(tags))
         self.events.append(event)
 
     def service_check(self, check_name, status, tags=None, timestamp=None,
@@ -606,6 +609,8 @@ class AgentCheck(object):
             hostname = self.hostname
         if message is not None:
             message = unicode(message) # ascii converts to unicode but not viceversa
+        if tags:
+            tags = sorted(set(tags))
         self.service_checks.append(
             create_service_check(check_name, status, tags, timestamp,
                                  hostname, check_run_id, message)
@@ -945,7 +950,7 @@ def agent_formatter(metric, value, timestamp, tags, hostname, device_name=None,
     """
     attributes = {}
     if tags:
-        attributes['tags'] = list(tags)
+        attributes['tags'] = list(set(tags))
     if hostname:
         attributes['hostname'] = hostname
     if device_name:
